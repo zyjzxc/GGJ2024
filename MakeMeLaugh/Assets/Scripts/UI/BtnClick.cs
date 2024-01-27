@@ -9,15 +9,13 @@ public class BtnClick : MonoBehaviour
     void Start()
     {
         button = GetComponent<Button>();
-        audioSource = GetComponent<AudioSource>();
-        button.onClick.AddListener(() => { audioSource.Play(); });
         // add click event listener
         button.onClick.AddListener(OnButtonClick);
     }
 
     void OnButtonClick()
     {
-        GameMgr.Instance.SetReuslt(1);
+        GameMgr.Instance.SetReuslt();
         // code to execute when button is clicked
         Debug.Log("Button has been clicked!");
     }
