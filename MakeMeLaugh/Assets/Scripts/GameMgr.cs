@@ -6,6 +6,8 @@ using Newtonsoft.Json;
 
 using System.IO;
 using TMPro;
+using UnityEngine.Video;
+using Unity.VisualScripting;
 
 
 
@@ -48,6 +50,7 @@ public class GameMgr : Singleton<GameMgr>
     private SpriteRenderer backSprite;
     private PanelController panelController;
     private OptionSelector optionSelector;
+    private VideoPlayer videoPlayer;
 
 
     public Slider optionSlider;
@@ -69,6 +72,8 @@ public class GameMgr : Singleton<GameMgr>
     LevelLines endLines = new LevelLines();
     LevelLines lines = new LevelLines();
     int currtentLine = 0;
+
+    bool gameStarted = false;
 
 
     void LoadLines()
@@ -133,6 +138,12 @@ public class GameMgr : Singleton<GameMgr>
 
     public void NextState()
     {
+        if (!gameStarted)
+        {
+            videoPlayer.Stop();
+            EndOpening(videoPlayer);
+            return;
+        }
         //if (state != GameState.Lines)
         //    state = (GameState)(((int)GameMgr.Instance.state + 1) % System.Enum.GetNames(typeof(GameState)).Length);
         //else
@@ -215,15 +226,28 @@ public class GameMgr : Singleton<GameMgr>
                 break;
             default: break;
         }
+        Debug.Log(state);
+    }
+
+    public override void Awake()
+    {
+        base.Awake();
+        videoPlayer = gameObject.GetComponent<VideoPlayer>();
+        videoPlayer.loopPointReached += EndOpening;
+        videoPlayer.Play();
+        //videoPlayer.Prepare();
+
+
     }
 
     // Start is called before the first frame update
     void Start()
     {
+        //videoPlayer.Play();
         backSprite = BackGround.GetComponent<SpriteRenderer>();
         panelController = Panel.GetComponent<PanelController>();
         optionSelector = gameObject.GetComponent<OptionSelector>();
-        LevelStart();
+        optionSlider.onValueChanged.AddListener(ShowPreview);
     }
 
     // Update is called once per frame
@@ -231,6 +255,21 @@ public class GameMgr : Singleton<GameMgr>
     {
         
     }
+
+    void ShowPreview(float v)
+    {
+        option1 = (int)optionSlider.value;
+        choosedFace = faces[option1 + option0 * 3];
+        var previewPath = string.Format("Textures/Preview/ui_emoji_00{0}", choosedFace);
+        Preview.sprite = Resources.Load<Sprite>(previewPath);
+        Debug.Log(option1 + option0 * 3);
+    }
+
+    public void SetOption0(int i)
+    {
+        option0 = i;
+        ShowPreview(0);
+    }    
 
     public void SetReuslt()
     {
@@ -240,6 +279,7 @@ public class GameMgr : Singleton<GameMgr>
         Sprite newSprite = Resources.Load<Sprite>(path);
         backSprite.sprite = newSprite;
         panelController.Hide();
+        BackGround.GetComponent<Animator>().CrossFade("shake", 0f);
         LoadEndLines();
         NextState();
     }
@@ -270,6 +310,13 @@ public class GameMgr : Singleton<GameMgr>
         LoadLines();
         if (currtentLine < lines.levelLines.Length)
             UpdataDiaglogue();
+    }
+
+    void EndOpening(VideoPlayer vp)
+    {
+        gameStarted = true;
+        videoPlayer.targetCamera = null;
+        LevelStart();
     }
 
 }

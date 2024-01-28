@@ -26,16 +26,19 @@ public class OptionSelector : MonoBehaviour
                 option0Button.image.sprite = On;
                 option1Button.image.sprite = Off;
                 option2Button.image.sprite = Off;
+                GameMgr.Instance.SetOption0(option);
                 break;
             case 1:
                 option1Button.image.sprite = On;
                 option0Button.image.sprite = Off;
                 option2Button.image.sprite = Off;
+                GameMgr.Instance.SetOption0(option);
                 break;
             case 2:
                 option2Button.image.sprite = On;
                 option0Button.image.sprite = Off;
                 option1Button.image.sprite = Off;
+                GameMgr.Instance.SetOption0(option);
                 break;
             default:
                 break;

@@ -4,11 +4,10 @@ using UnityEngine;
 public class PanelController : MonoBehaviour
 {
     public float duration = 0.50f; // duration of the animation
-    public float distance = 1000;
     private RectTransform rectTransform;
     private CanvasGroup canvasGroup;
 
-    private float originHeight = -362;
+    private float originHeight = -50;
 
     void Start()
     {
@@ -18,7 +17,6 @@ public class PanelController : MonoBehaviour
 
     public void Show()
     {
-        gameObject.SetActive(true);
         StartCoroutine(ShowRoutine());
     }
 
@@ -44,15 +42,15 @@ public class PanelController : MonoBehaviour
             float t = (Time.time - startTime) / duration;
 
             // move the panel up or down
-            rectTransform.anchoredPosition = new Vector2(rectTransform.anchoredPosition.x, Mathf.Lerp(showing ? -distance : originHeight, showing ? originHeight : -distance, t));
+            rectTransform.anchoredPosition = new Vector2(rectTransform.anchoredPosition.x, Mathf.Lerp(showing ? -rectTransform.sizeDelta.y : originHeight, showing ? originHeight : -rectTransform.sizeDelta.y, t));
 
             // fade the panel in or out
-            //canvasGroup.alpha = showing ? t : 1 - t;
+            canvasGroup.alpha = showing ? t : 1 - t;
 
             yield return null;
         }
 
-        rectTransform.anchoredPosition = new Vector2(rectTransform.anchoredPosition.x, showing ? originHeight : -distance);
+        rectTransform.anchoredPosition = new Vector2(rectTransform.anchoredPosition.x, showing ? originHeight : -rectTransform.sizeDelta.y);
         canvasGroup.alpha = showing ? 1 : 0;
     }
 
@@ -61,8 +59,8 @@ public class PanelController : MonoBehaviour
         Vector3 originalPos = rectTransform.anchoredPosition;
 
         float elapsed = 0.0f;
-        float duration = 0.15f; // duration of the shake
-        float intensity = 10.0f; // intensity of the shake
+        float duration = 0.1f; // duration of the shake
+        float intensity = 5.0f; // intensity of the shake
 
         while (elapsed < duration)
         {
