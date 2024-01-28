@@ -7,7 +7,6 @@ using Newtonsoft.Json;
 using System.IO;
 using TMPro;
 using UnityEngine.Video;
-using Unity.VisualScripting;
 
 
 
@@ -63,7 +62,6 @@ public class GameMgr : Singleton<GameMgr>
 
     private const string ResultPathTmp = "Textures/{0}/{1}_{2}bg";
     private const string BGTmp = "Textures/{0}/{1}_bg";
-    private const string LvPath = "Assets/Resources/Textures/{0}";
 
     private int[] faces = new int[9] { 3, 8, 7, 0, 1, 6, 4, 2, 5 };
 
@@ -78,12 +76,13 @@ public class GameMgr : Singleton<GameMgr>
 
     void LoadLines()
     {
-        string path = "Assets/Data/{0}.json";
-        path = string.Format(path, currentLevel);
+        string path = "Data/{0}";
+        var textAsset = Resources.Load<UnityEngine.TextAsset>(string.Format(path, currentLevel));
+        //path = string.Format(path, currentLevel, choosedFace);
 
-        if (File.Exists(path))
+        if (textAsset != null)
         {
-            string jsonString = File.ReadAllText(path);
+            string jsonString = textAsset.text;
             jsonString = "{\"levelLines\":" + jsonString + "}";
             lines = JsonUtility.FromJson<LevelLines>(jsonString);
 
@@ -100,12 +99,13 @@ public class GameMgr : Singleton<GameMgr>
 
     void LoadEndLines()
     {
-        string path = "Assets/Data/Results/{0}/{1}.json";
-        path = string.Format(path, currentLevel, choosedFace);
+        string path = "Data/Results/{0}/{1}";
+        var textAsset = Resources.Load<UnityEngine.TextAsset>(string.Format(path, currentLevel, choosedFace));
+        //path = string.Format(path, currentLevel, choosedFace);
 
-        if (File.Exists(path))
+        if (textAsset!=null)
         {
-            string jsonString = File.ReadAllText(path);
+            string jsonString = textAsset.text;
             jsonString = "{\"levelLines\":" + jsonString + "}";
             endLines = JsonUtility.FromJson<LevelLines>(jsonString);
 
@@ -144,37 +144,6 @@ public class GameMgr : Singleton<GameMgr>
             EndOpening(videoPlayer);
             return;
         }
-        //if (state != GameState.Lines)
-        //    state = (GameState)(((int)GameMgr.Instance.state + 1) % System.Enum.GetNames(typeof(GameState)).Length);
-        //else
-        //{
-        //    currtentLine++;
-        //    if (currtentLine < lines.levelLines.Length)
-        //    {
-        //        UpdataDiaglogue();
-        //    }
-        //    else
-        //    {
-        //        dialogue.SetActive(false);
-        //        state = (GameState)(((int)GameMgr.Instance.state + 1) % System.Enum.GetNames(typeof(GameState)).Length);
-        //        currtentLine = 0;
-        //    }
-        //}
-        //if (state == GameState.Pending)
-        //{
-        //    panelController.Show();
-        //    NextBtn.interactable = false;
-        //    NextBtn.gameObject.GetComponent<CanvasGroup>().blocksRaycasts = false;
-        //}
-        //else
-        //{
-        //    NextBtn.interactable = true;
-        //    NextBtn.gameObject.GetComponent<CanvasGroup>().blocksRaycasts = true;
-        //    if (state == GameState.Lines && currtentLine == 0)
-        //    {
-        //        NextLevel();
-        //    }
-        //}
 
         switch(state)
         {
@@ -284,11 +253,52 @@ public class GameMgr : Singleton<GameMgr>
         NextState();
     }
 
+    //IEnumerator NextLevel()
+    //{
+    //    currentLevel++;
+    //    var path = string.Format(BGTmp, currentLevel, currentLevel);
+    //    Sprite newSprite = Resources.Load<Sprite>(path);
+    //    if (newSprite == null)
+    //        GameRest();
+
+    //    float fadeInDuration = 1f;
+    //    SpriteRenderer spriteRenderer = backSprite;
+    //    Color currentColor = spriteRenderer.color;
+
+    //    for (float t = 0; t < fadeInDuration; t += Time.deltaTime)
+    //    {
+    //        float normalizedTime = t / fadeInDuration;
+    //        // we fade in in alpha channel
+    //        spriteRenderer.color = new Color(currentColor.r, currentColor.g, currentColor.b, normalizedTime);
+    //        yield return null;
+    //    }
+
+    //    spriteRenderer.color = new Color(currentColor.r, currentColor.g, currentColor.b, 1);
+
+    //    LevelStart();
+    //}
+
+    IEnumerator FadeInSprite(SpriteRenderer spriteRenderer, float fadeInDuration)
+    {
+        Color currentColor = spriteRenderer.color;
+        for (float t = 0; t < fadeInDuration; t += Time.deltaTime)
+        {
+            float normalizedTime = t / fadeInDuration;
+            // we fade in in alpha channel
+            spriteRenderer.color = new Color(currentColor.r, currentColor.g, currentColor.b, normalizedTime);
+            yield return null;
+        }
+        spriteRenderer.color = new Color(currentColor.r, currentColor.g, currentColor.b, 1);
+    }
+
     void NextLevel()
     {
         currentLevel++;
-        if (!Directory.Exists(string.Format(LvPath, currentLevel)))
+        var path = string.Format(BGTmp, currentLevel, currentLevel);
+        Sprite newSprite = Resources.Load<Sprite>(path);
+        if (newSprite == null)
             GameRest();
+
         LevelStart();
     }
 
@@ -310,6 +320,7 @@ public class GameMgr : Singleton<GameMgr>
         LoadLines();
         if (currtentLine < lines.levelLines.Length)
             UpdataDiaglogue();
+
     }
 
     void EndOpening(VideoPlayer vp)
