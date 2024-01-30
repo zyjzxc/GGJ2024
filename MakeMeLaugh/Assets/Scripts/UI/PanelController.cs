@@ -17,6 +17,8 @@ public class PanelController : MonoBehaviour
 
     public void Show()
     {
+        var audioSource = GetComponent<AudioSource>();
+        audioSource.Play();
         StartCoroutine(ShowRoutine());
     }
 
@@ -28,6 +30,8 @@ public class PanelController : MonoBehaviour
 
     public void Hide()
     {
+        var audioSource = GetComponent<AudioSource>();
+        audioSource.Play();
         StartCoroutine(AnimatePanel(false));
     }
 

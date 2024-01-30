@@ -142,6 +142,8 @@ public class GameMgr : Singleton<GameMgr>
         {
             videoPlayer.Stop();
             EndOpening(videoPlayer);
+            var audioSource = GetComponent<AudioSource>();
+            audioSource.Play();
             return;
         }
 
@@ -186,7 +188,7 @@ public class GameMgr : Singleton<GameMgr>
                     dialogue.SetActive(false);
                     state = (GameState)(((int)GameMgr.Instance.state + 1) % System.Enum.GetNames(typeof(GameState)).Length);
                     currtentLine = 0;
-                    NextLevel();
+                    StartCoroutine(NextLevel());
                 }
                 //if (state == GameState.Lines && currtentLine == 0)
                 //{
@@ -227,6 +229,9 @@ public class GameMgr : Singleton<GameMgr>
 
     void ShowPreview(float v)
     {
+        var audio = optionSlider.gameObject.GetComponent<AudioSource>();
+        audio.Play();
+
         option1 = (int)optionSlider.value;
         choosedFace = faces[option1 + option0 * 3];
         var previewPath = string.Format("Textures/Preview/ui_emoji_00{0}", choosedFace);
@@ -291,14 +296,22 @@ public class GameMgr : Singleton<GameMgr>
         spriteRenderer.color = new Color(currentColor.r, currentColor.g, currentColor.b, 1);
     }
 
-    void NextLevel()
+    IEnumerator NextLevel()
     {
+        NextBtn.interactable = false;
+        NextBtn.gameObject.GetComponent<CanvasGroup>().blocksRaycasts = false;
         currentLevel++;
+        if (currentLevel == 6) { currentLevel = 8; }
         var path = string.Format(BGTmp, currentLevel, currentLevel);
         Sprite newSprite = Resources.Load<Sprite>(path);
         if (newSprite == null)
             GameRest();
-
+        var path1 = string.Format(BGTmp, currentLevel, currentLevel);
+        Sprite newSprite1 = Resources.Load<Sprite>(path1);
+        backSprite.sprite = newSprite1;
+        yield return StartCoroutine(FadeInSprite(backSprite, 1));
+        NextBtn.interactable = true;
+        NextBtn.gameObject.GetComponent<CanvasGroup>().blocksRaycasts = true;
         LevelStart();
     }
 
