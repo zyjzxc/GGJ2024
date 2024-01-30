@@ -142,8 +142,6 @@ public class GameMgr : Singleton<GameMgr>
         {
             videoPlayer.Stop();
             EndOpening(videoPlayer);
-            var audioSource = GetComponent<AudioSource>();
-            audioSource.Play();
             return;
         }
 
@@ -338,6 +336,8 @@ public class GameMgr : Singleton<GameMgr>
 
     void EndOpening(VideoPlayer vp)
     {
+        var audioSource = GetComponent<AudioSource>();
+        audioSource.Play();
         gameStarted = true;
         videoPlayer.targetCamera = null;
         LevelStart();
